@@ -5,13 +5,19 @@ import "github.com/spf13/cobra"
 func NewCLI() *cobra.Command {
 
 	rootCmd := &cobra.Command{
-		Use:   "cruz",
-		Short: "Santa Cruz CLI",
+		Use:          "cruz",
+		Short:        "Santa Cruz CLI",
+		SilenceUsage: true,
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
 	}
 
 	rootCmd.AddCommand(
-		listDbsCmd(),
 		addDbCmd(),
+		listDbsCmd(),
+		showDbCmd(),
+		removeDbCmd(),
 	)
 
 	return rootCmd

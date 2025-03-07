@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -38,9 +39,10 @@ func listDbs(cmd *cobra.Command, args []string) error {
 
 func listDbsCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List databases",
-		RunE:  listDbs,
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List databases",
+		RunE:    listDbs,
 	}
 	return cmd
 }
@@ -103,5 +105,95 @@ func addDbCmd() *cobra.Command {
 	}
 	cmd.Flags().StringP("name", "n", "", "Name of the database")
 	cmd.Flags().StringP("description", "d", "", "Description of the database")
+	return cmd
+}
+
+func removeDb(cmd *cobra.Command, args []string) error {
+	fmt.Println("Remove database from tracking:")
+
+	ds, err := manager.InitDBManger()
+	if err != nil {
+		return err
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	db, err := ds.GetDb(int64(id))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("----")
+	fmt.Println("ID:          ", db.ID)
+	fmt.Println("Name:        ", db.Name)
+	fmt.Println("Path:        ", db.Path)
+	fmt.Println("Description: ", db.Description.String)
+	fmt.Println("Created At:  ", db.CreatedAt)
+	fmt.Println("Updated At:  ", db.UpdatedAt)
+	fmt.Println("----")
+
+	fmt.Println("Are you sure you want to stop tracking this database? (y/n)")
+	var confirm string
+	fmt.Scanln(&confirm)
+
+	if confirm == "y" {
+		err := ds.RemoveDb(int64(id))
+		if err != nil {
+			return err
+		}
+		fmt.Println("Tracking removed successfully")
+	}
+
+	return nil
+}
+
+func removeDbCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "remove",
+		Aliases: []string{"rm"},
+		Short:   "Remove database tracking, usage: cruz remove <id>",
+		Args:    cobra.ExactArgs(1),
+		RunE:    removeDb,
+	}
+	return cmd
+}
+
+func showDb(cmd *cobra.Command, args []string) error {
+
+	ds, err := manager.InitDBManger()
+	if err != nil {
+		return err
+	}
+
+	id, _ := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	db, err := ds.GetDb(int64(id))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("ID:          ", db.ID)
+	fmt.Println("Name:        ", db.Name)
+	fmt.Println("Path:        ", db.Path)
+	fmt.Println("Description: ", db.Description.String)
+	fmt.Println("Created At:  ", db.CreatedAt)
+	fmt.Println("Updated At:  ", db.UpdatedAt)
+
+	return nil
+}
+
+func showDbCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show",
+		Short: "Show database, usage: cruz show <id>",
+		Args:  cobra.ExactArgs(1),
+		RunE:  showDb,
+	}
 	return cmd
 }

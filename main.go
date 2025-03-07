@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
-
+	"context"
 	_ "embed"
+	"log"
 
 	_ "modernc.org/sqlite"
 
 	"github.com/st3w4r/santa-cruz/cmd"
+	"github.com/st3w4r/santa-cruz/config"
 )
 
 // //go:embed schema.sql
@@ -58,12 +59,10 @@ import (
 
 func main() {
 
-	cli := cmd.NewCLI()
-	if err := cli.Execute(); err != nil {
-		log.Fatal(err)
+	_, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading config: %v", err)
 	}
 
-	//	if err := run(); err != nil {
-	//		log.Fatal(err)
-	//	}
+	cmd.NewCLI().ExecuteContext(context.Background())
 }

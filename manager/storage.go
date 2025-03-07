@@ -78,3 +78,21 @@ func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, e
 	}
 	return createdDb, nil
 }
+
+func (ds *dbStorageSystem) GetDb(id int64) (dbmanager.Database, error) {
+	ctx := context.Background()
+	db, err := ds.queries.GetDatabase(ctx, id)
+	if err != nil {
+		return dbmanager.Database{}, err
+	}
+	return db, nil
+}
+
+func (ds *dbStorageSystem) RemoveDb(id int64) error {
+	ctx := context.Background()
+	err := ds.queries.DeleteDatabase(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -9,3 +9,7 @@ I will have to store the location of files.
 This can be even sotred inside a sqlite db.
 I'll look at a go library.
 
+I now have the ability to list and add a new sqlite file.
+I should add abilities to ask before adding a duplicate file.
+I should also add the ability to remove a file.
+
