@@ -1,0 +1,43 @@
+-- name: GetDatabase :one
+SELECT
+    id,
+    name,
+    description,
+    created_at,
+    updated_at
+FROM databases
+WHERE id = ?;
+
+-- name: ListDatabases :many
+SELECT
+    id,
+    name,
+    description,
+    created_at,
+    updated_at
+FROM databases;
+
+-- name: CreateDatabase :one
+INSERT INTO databases (
+    name,
+    description,
+    created_at,
+    updated_at
+) VALUES (
+    ?,
+    ?,
+    ?,
+    ?
+) RETURNING *;
+
+-- name: UpdateDatabase :exec
+UPDATE databases
+SET
+    name = ?,
+    description = ?,
+    updated_at = ?
+WHERE id = ?;
+
+-- name: DeleteDatabase :exec
+DELETE FROM databases
+WHERE id = ?;
