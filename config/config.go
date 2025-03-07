@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/adrg/xdg"
@@ -28,8 +27,6 @@ func LoadConfig() (Config, error) {
 	if cfg.DB_MANAGER_PATH == "" {
 		cfg.DB_MANAGER_PATH = dbPath
 	}
-
-	fmt.Println(cfg)
 
 	return cfg, nil
 }

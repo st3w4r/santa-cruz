@@ -24,7 +24,13 @@ func listDbs(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, db := range dbs {
-		fmt.Println(db)
+		fmt.Println("ID:          ", db.ID)
+		fmt.Println("Name:        ", db.Name)
+		fmt.Println("Path:        ", db.Path)
+		fmt.Println("Description: ", db.Description.String)
+		fmt.Println("Created At:  ", db.CreatedAt)
+		fmt.Println("Updated At:  ", db.UpdatedAt)
+		fmt.Println("----")
 	}
 
 	return nil
@@ -45,24 +51,21 @@ func addDb(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	// get absolute path
+
 	pathAbs, err := filepath.Abs(args[0])
 	if err != nil {
 		return err
 	}
 
-	// check if file exists
 	if fi, err := os.Stat(pathAbs); os.IsNotExist(err) || fi.IsDir() {
 		fmt.Println("File does not exist")
 		return err
 	}
 
-	// check if file is a sqlite db
 	if !strings.HasSuffix(pathAbs, ".db") {
 		return errors.New("File is not a sqlite db")
 	}
 
-	// get the name
 	var name string
 	name = cmd.Flag("name").Value.String()
 	if name == "" {
@@ -75,15 +78,18 @@ func addDb(cmd *cobra.Command, args []string) error {
 
 	desc := cmd.Flag("description").Value.String()
 
-	// remove the extension
-	fmt.Println("Path: "+pathAbs, "Name: "+name)
-
 	db, err := ds.AddDb(name, pathAbs, desc)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(db)
+	fmt.Println("Database added successfully")
+	fmt.Println("ID:          ", db.ID)
+	fmt.Println("Name:        ", db.Name)
+	fmt.Println("Path:        ", db.Path)
+	fmt.Println("Description: ", db.Description.String)
+	fmt.Println("Created At:  ", db.CreatedAt)
+	fmt.Println("Updated At:  ", db.UpdatedAt)
 
 	return nil
 }
