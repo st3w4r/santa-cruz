@@ -134,16 +134,17 @@ func (q *Queries) ListDatabases(ctx context.Context) ([]Database, error) {
 const updateDatabase = `-- name: UpdateDatabase :exec
 UPDATE databases
 SET
-    name = ?,
-    path = ?,
-    description = ?,
-    updated_at = ?
-WHERE id = ?
+    name = coalesce(?1, name),
+    path = coalesce(?2, path),
+    description = coalesce(?3, description),
+    updated_at = ?4
+WHERE id = ?5
+RETURNING id, name, path, description, created_at, updated_at
 `
 
 type UpdateDatabaseParams struct {
-	Name        string
-	Path        string
+	Name        sql.NullString
+	Path        sql.NullString
 	Description sql.NullString
 	UpdatedAt   string
 	ID          int64

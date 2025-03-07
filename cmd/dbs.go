@@ -224,3 +224,47 @@ func showDbCmd() *cobra.Command {
 	}
 	return cmd
 }
+
+func editDb(cmd *cobra.Command, args []string) error {
+
+	ds, err := manager.InitDBManger()
+	if err != nil {
+		return err
+	}
+
+	id, _ := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	_, err = ds.GetDb(int64(id))
+	if err != nil {
+		return err
+	}
+
+	name := cmd.Flag("name").Value.String()
+	desc := cmd.Flag("description").Value.String()
+	path := cmd.Flag("path").Value.String()
+
+	err = ds.UpdateDb(int64(id), name, path, desc)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Database updated successfully")
+
+	return nil
+}
+
+func editDbCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "edit",
+		Short: "Edit database, usage: cruz edit <id>",
+		Args:  cobra.ExactArgs(1),
+		RunE:  editDb,
+	}
+	cmd.Flags().StringP("name", "n", "", "Name of the database")
+	cmd.Flags().StringP("description", "d", "", "Description of the database")
+	cmd.Flags().StringP("path", "p", "", "Path of the database")
+	return cmd
+}

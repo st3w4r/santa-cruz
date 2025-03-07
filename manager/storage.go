@@ -90,3 +90,20 @@ func (ds *dbStorageSystem) RemoveDb(id int64) error {
 	}
 	return nil
 }
+
+func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) error {
+	ctx := context.Background()
+	timeNow := time.Now().UTC().Format(time.RFC3339)
+
+	err := ds.queries.UpdateDatabase(ctx, dbmanager.UpdateDatabaseParams{
+		ID:          id,
+		Name:        sql.NullString{String: name, Valid: name != ""},
+		Path:        sql.NullString{String: path, Valid: path != ""},
+		Description: sql.NullString{String: desc, Valid: desc != ""},
+		UpdatedAt:   timeNow,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
