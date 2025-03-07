@@ -3,8 +3,11 @@ package manager
 import (
 	"context"
 	"database/sql"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/st3w4r/santa-cruz/config"
 	"github.com/st3w4r/santa-cruz/dbsqlc"
 	"github.com/st3w4r/santa-cruz/dbsqlc/dbmanager"
 )
@@ -22,13 +25,22 @@ type dbStorageSystem struct {
 }
 
 func InitDBManger() (dbStorageSystem, error) {
-	ctx := context.Background()
-	db, err := sql.Open("sqlite", ":memory:")
-
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return dbStorageSystem{}, err
 	}
 
+	dbPath := cfg.DB_MANAGER_PATH
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(dbPath), os.ModePerm)
+	}
+
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return dbStorageSystem{}, err
+	}
+
+	ctx := context.Background()
 	if _, err := db.ExecContext(ctx, dbsqlc.CreateTableSchema); err != nil {
 		return dbStorageSystem{}, err
 	}
@@ -38,6 +50,7 @@ func InitDBManger() (dbStorageSystem, error) {
 	return dbStorageSystem{
 		db:      db,
 		queries: queries,
+		dbPath:  dbPath,
 	}, nil
 }
 
@@ -50,14 +63,15 @@ func (ds *dbStorageSystem) ListDbs() ([]dbmanager.Database, error) {
 	return dbs, nil
 }
 
-func (ds *dbStorageSystem) AddDb(name, path string) (dbmanager.Database, error) {
+func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, error) {
 	ctx := context.Background()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	createdDb, err := ds.queries.CreateDatabase(ctx, dbmanager.CreateDatabaseParams{
-		Name:      name,
-		Path:      path,
-		CreatedAt: timeNow,
-		UpdatedAt: timeNow,
+		Name:        name,
+		Path:        path,
+		Description: sql.NullString{String: desc, Valid: true},
+		CreatedAt:   timeNow,
+		UpdatedAt:   timeNow,
 	})
 	if err != nil {
 		return dbmanager.Database{}, err
