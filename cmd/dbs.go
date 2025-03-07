@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/st3w4r/santa-cruz/manager"
 )
@@ -24,15 +25,24 @@ func listDbs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	data := [][]string{}
+
 	for _, db := range dbs {
-		fmt.Println("ID:          ", db.ID)
-		fmt.Println("Name:        ", db.Name)
-		fmt.Println("Path:        ", db.Path)
-		fmt.Println("Description: ", db.Description.String)
-		fmt.Println("Created At:  ", db.CreatedAt)
-		fmt.Println("Updated At:  ", db.UpdatedAt)
-		fmt.Println("----")
+		data = append(data, []string{
+			strconv.FormatInt(db.ID, 10),
+			db.Name,
+			db.Path,
+			db.Description.String,
+			db.CreatedAt,
+			db.UpdatedAt,
+		})
 	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Name", "Path", "Description", "Created At", "Updated At"})
+	table.SetBorder(false)
+	table.AppendBulk(data)
+	table.Render()
 
 	return nil
 }
@@ -116,35 +126,43 @@ func removeDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	id, err := strconv.Atoi(args[0])
-	if err != nil {
-		return err
-	}
-
-	db, err := ds.GetDb(int64(id))
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("----")
-	fmt.Println("ID:          ", db.ID)
-	fmt.Println("Name:        ", db.Name)
-	fmt.Println("Path:        ", db.Path)
-	fmt.Println("Description: ", db.Description.String)
-	fmt.Println("Created At:  ", db.CreatedAt)
-	fmt.Println("Updated At:  ", db.UpdatedAt)
-	fmt.Println("----")
-
-	fmt.Println("Are you sure you want to stop tracking this database? (y/n)")
-	var confirm string
-	fmt.Scanln(&confirm)
-
-	if confirm == "y" {
-		err := ds.RemoveDb(int64(id))
+	var ids []int64
+	for _, arg := range args {
+		id, err := strconv.Atoi(arg)
 		if err != nil {
-			return err
+			fmt.Printf("Invalid id: %s\n", arg)
+			continue
 		}
-		fmt.Println("Tracking removed successfully")
+		ids = append(ids, int64(id))
+	}
+
+	for _, id := range ids {
+		db, err := ds.GetDb(int64(id))
+		if err != nil {
+			fmt.Printf("Database with id %d not found\n", id)
+			continue
+		}
+
+		fmt.Println("----")
+		fmt.Println("ID:          ", db.ID)
+		fmt.Println("Name:        ", db.Name)
+		fmt.Println("Path:        ", db.Path)
+		fmt.Println("Description: ", db.Description.String)
+		fmt.Println("Created At:  ", db.CreatedAt)
+		fmt.Println("Updated At:  ", db.UpdatedAt)
+		fmt.Println("----")
+
+		fmt.Println("Are you sure you want to stop tracking this database? (y/n)")
+		var confirm string
+		fmt.Scanln(&confirm)
+
+		if confirm == "y" {
+			err := ds.RemoveDb(int64(id))
+			if err != nil {
+				return err
+			}
+			fmt.Println("Tracking removed successfully")
+		}
 	}
 
 	return nil
@@ -155,7 +173,7 @@ func removeDbCmd() *cobra.Command {
 		Use:     "remove",
 		Aliases: []string{"rm"},
 		Short:   "Remove database tracking, usage: cruz remove <id>",
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MinimumNArgs(1),
 		RunE:    removeDb,
 	}
 	return cmd

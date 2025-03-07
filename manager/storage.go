@@ -12,12 +12,6 @@ import (
 	"github.com/st3w4r/santa-cruz/dbsqlc/dbmanager"
 )
 
-type StorageSystem interface {
-	ListDbs() error
-	CreateDb() error
-	GetDb() error
-}
-
 type dbStorageSystem struct {
 	db      *sql.DB
 	queries *dbmanager.Queries
