@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.28.0
 
-package dbsqlc
+package dbmanager
 
 import (
 	"database/sql"
@@ -11,6 +11,7 @@ import (
 type Database struct {
 	ID          int64
 	Name        string
+	Path        string
 	Description sql.NullString
 	CreatedAt   string
 	UpdatedAt   string

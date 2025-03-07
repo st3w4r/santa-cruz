@@ -3,7 +3,7 @@
 //   sqlc v1.28.0
 // source: query.sql
 
-package dbsqlc
+package dbmanager
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 const createDatabase = `-- name: CreateDatabase :one
 INSERT INTO databases (
     name,
+    path,
     description,
     created_at,
     updated_at
@@ -20,12 +21,14 @@ INSERT INTO databases (
     ?,
     ?,
     ?,
+    ?,
     ?
-) RETURNING id, name, description, created_at, updated_at
+) RETURNING id, name, path, description, created_at, updated_at
 `
 
 type CreateDatabaseParams struct {
 	Name        string
+	Path        string
 	Description sql.NullString
 	CreatedAt   string
 	UpdatedAt   string
@@ -34,6 +37,7 @@ type CreateDatabaseParams struct {
 func (q *Queries) CreateDatabase(ctx context.Context, arg CreateDatabaseParams) (Database, error) {
 	row := q.db.QueryRowContext(ctx, createDatabase,
 		arg.Name,
+		arg.Path,
 		arg.Description,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -42,6 +46,7 @@ func (q *Queries) CreateDatabase(ctx context.Context, arg CreateDatabaseParams) 
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.Path,
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -63,6 +68,7 @@ const getDatabase = `-- name: GetDatabase :one
 SELECT
     id,
     name,
+    path,
     description,
     created_at,
     updated_at
@@ -76,6 +82,7 @@ func (q *Queries) GetDatabase(ctx context.Context, id int64) (Database, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.Path,
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -87,6 +94,7 @@ const listDatabases = `-- name: ListDatabases :many
 SELECT
     id,
     name,
+    path,
     description,
     created_at,
     updated_at
@@ -105,6 +113,7 @@ func (q *Queries) ListDatabases(ctx context.Context) ([]Database, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.Path,
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -126,6 +135,7 @@ const updateDatabase = `-- name: UpdateDatabase :exec
 UPDATE databases
 SET
     name = ?,
+    path = ?,
     description = ?,
     updated_at = ?
 WHERE id = ?
@@ -133,6 +143,7 @@ WHERE id = ?
 
 type UpdateDatabaseParams struct {
 	Name        string
+	Path        string
 	Description sql.NullString
 	UpdatedAt   string
 	ID          int64
@@ -141,6 +152,7 @@ type UpdateDatabaseParams struct {
 func (q *Queries) UpdateDatabase(ctx context.Context, arg UpdateDatabaseParams) error {
 	_, err := q.db.ExecContext(ctx, updateDatabase,
 		arg.Name,
+		arg.Path,
 		arg.Description,
 		arg.UpdatedAt,
 		arg.ID,
