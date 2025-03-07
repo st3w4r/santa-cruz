@@ -28,6 +28,11 @@ func listDbs(cmd *cobra.Command, args []string) error {
 	data := [][]string{}
 
 	for _, db := range dbs {
+
+		if _, err := os.Stat(db.Path); os.IsNotExist(err) {
+			db.Path = fmt.Sprintf("%s (NOT FOUND)", db.Path)
+		}
+
 		data = append(data, []string{
 			strconv.FormatInt(db.ID, 10),
 			db.Name,
@@ -194,6 +199,10 @@ func showDb(cmd *cobra.Command, args []string) error {
 	db, err := ds.GetDb(int64(id))
 	if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(db.Path); os.IsNotExist(err) {
+		db.Path = fmt.Sprintf("%s (NOT FOUND)", db.Path)
 	}
 
 	fmt.Println("ID:          ", db.ID)
