@@ -246,12 +246,18 @@ func editDb(cmd *cobra.Command, args []string) error {
 	desc := cmd.Flag("description").Value.String()
 	path := cmd.Flag("path").Value.String()
 
-	err = ds.UpdateDb(int64(id), name, path, desc)
+	db, err := ds.UpdateDb(int64(id), name, path, desc)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Database updated successfully")
+	fmt.Println("Database updated successfully:")
+	fmt.Println("ID:          ", db.ID)
+	fmt.Println("Name:        ", db.Name)
+	fmt.Println("Path:        ", db.Path)
+	fmt.Println("Description: ", db.Description.String)
+	fmt.Println("Created At:  ", db.CreatedAt)
+	fmt.Println("Updated At:  ", db.UpdatedAt)
 
 	return nil
 }

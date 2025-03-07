@@ -34,7 +34,7 @@ INSERT INTO databases (
     ?
 ) RETURNING *;
 
--- name: UpdateDatabase :exec
+-- name: UpdateDatabase :one
 UPDATE databases
 SET
     name = coalesce(sqlc.narg('name'), name),

@@ -91,11 +91,11 @@ func (ds *dbStorageSystem) RemoveDb(id int64) error {
 	return nil
 }
 
-func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) error {
+func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) (dbmanager.Database, error) {
 	ctx := context.Background()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 
-	err := ds.queries.UpdateDatabase(ctx, dbmanager.UpdateDatabaseParams{
+	db, err := ds.queries.UpdateDatabase(ctx, dbmanager.UpdateDatabaseParams{
 		ID:          id,
 		Name:        sql.NullString{String: name, Valid: name != ""},
 		Path:        sql.NullString{String: path, Valid: path != ""},
@@ -103,7 +103,7 @@ func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) error {
 		UpdatedAt:   timeNow,
 	})
 	if err != nil {
-		return err
+		return dbmanager.Database{}, err
 	}
-	return nil
+	return db, nil
 }

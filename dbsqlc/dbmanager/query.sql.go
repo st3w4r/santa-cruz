@@ -131,7 +131,7 @@ func (q *Queries) ListDatabases(ctx context.Context) ([]Database, error) {
 	return items, nil
 }
 
-const updateDatabase = `-- name: UpdateDatabase :exec
+const updateDatabase = `-- name: UpdateDatabase :one
 UPDATE databases
 SET
     name = coalesce(?1, name),
@@ -150,13 +150,22 @@ type UpdateDatabaseParams struct {
 	ID          int64
 }
 
-func (q *Queries) UpdateDatabase(ctx context.Context, arg UpdateDatabaseParams) error {
-	_, err := q.db.ExecContext(ctx, updateDatabase,
+func (q *Queries) UpdateDatabase(ctx context.Context, arg UpdateDatabaseParams) (Database, error) {
+	row := q.db.QueryRowContext(ctx, updateDatabase,
 		arg.Name,
 		arg.Path,
 		arg.Description,
 		arg.UpdatedAt,
 		arg.ID,
 	)
-	return err
+	var i Database
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Path,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
