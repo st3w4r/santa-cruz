@@ -63,9 +63,10 @@ func listTables(cmd *cobra.Command, args []string) error {
 
 func listTablesCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "tables",
-		Short: "List tables",
-		Args:  cobra.ExactArgs(1),
-		RunE:  listTables,
+		Use:     "tables",
+		Short:   "List tables",
+		Aliases: []string{"tbl"},
+		Args:    cobra.ExactArgs(1),
+		RunE:    listTables,
 	}
 }

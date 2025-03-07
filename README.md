@@ -6,8 +6,11 @@ Bring an easy integration via function calling to sqlite databases.
 
 ## Features
 
-- [ ] List SQLite databases
-- [ ] Add SQLite database
+- [x] List SQLite databases
+- [x] Add SQLite database
+- [x] Remove SQLite database
+- [x] Edit SQLite database
+- [x] List tables
 - [ ] Run queries
 - [ ] Create new SQLite database
 

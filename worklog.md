@@ -19,5 +19,8 @@ Seemms this is what I need to do:
 - https://docs.sqlc.dev/en/latest/howto/named_parameters.html#nullable-parameters
 
 
+One particularity is I want to manage SQLite databses. And I as well use SQLite databased to store the information about the databases I manage.
+I need to make a clear separation between the two. Even if I can reuse code, I need to make sure I don't mix the two.
+
 
 
