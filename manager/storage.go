@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	_ "modernc.org/sqlite"
+
 	"github.com/st3w4r/santa-cruz/config"
 	"github.com/st3w4r/santa-cruz/dbsqlc"
 	"github.com/st3w4r/santa-cruz/dbsqlc/dbmanager"

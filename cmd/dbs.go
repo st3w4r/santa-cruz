@@ -191,7 +191,7 @@ func showDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	id, _ := strconv.Atoi(args[0])
+	id, err := strconv.Atoi(args[0])
 	if err != nil {
 		return err
 	}

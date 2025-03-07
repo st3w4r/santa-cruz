@@ -21,5 +21,9 @@ func NewCLI() *cobra.Command {
 		editDbCmd(),
 	)
 
+	rootCmd.AddCommand(
+		listTablesCmd(),
+	)
+
 	return rootCmd
 }
