@@ -23,6 +23,7 @@ func NewCLI() *cobra.Command {
 
 	rootCmd.AddCommand(
 		listTablesCmd(),
+		queryCmd(),
 	)
 
 	return rootCmd

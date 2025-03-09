@@ -24,3 +24,8 @@ I need to make a clear separation between the two. Even if I can reuse code, I n
 
 
 
+# 2025-03-09
+
+I want to execute queries on the databases I manage.
+The query will return data dynamically based on the databse I am querying.
+
