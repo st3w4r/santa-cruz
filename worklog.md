@@ -83,3 +83,9 @@ func isUniqueViolation(err error) bool {
 
 Okay this is working. Now I would like to select databases in the cli via names instead of using the ID.
 
+Okay I added the ability to manage databases by name.
+
+
+Error handling need to be imrpoved.
+When there is no rows returned.
+I handled it, I created a custom error like that I can handle it. And it is not licking the implementation details.
