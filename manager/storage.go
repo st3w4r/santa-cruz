@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -79,17 +80,25 @@ func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, e
 	return createdDb, nil
 }
 
+var ErrorNotFound = errors.New("not found")
+
 func (ds *dbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, error) {
 	ctx := context.Background()
+	var (
+		db  dbmanager.Database
+		err error
+	)
+
 	if name != "" {
-		db, err := ds.queries.GetDatabaseByName(ctx, name)
-		if err != nil {
-			return dbmanager.Database{}, err
-		}
-		return db, nil
+		db, err = ds.queries.GetDatabaseByName(ctx, name)
+	} else {
+		db, err = ds.queries.GetDatabase(ctx, id)
 	}
-	db, err := ds.queries.GetDatabase(ctx, id)
+
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return dbmanager.Database{}, ErrorNotFound
+		}
 		return dbmanager.Database{}, err
 	}
 	return db, nil

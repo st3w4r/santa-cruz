@@ -212,6 +212,10 @@ func showDb(cmd *cobra.Command, args []string) error {
 
 	db, err := ds.GetDb(int64(id), dbName)
 	if err != nil {
+		if errors.Is(err, manager.ErrorNotFound) {
+			return fmt.Errorf("database '%s' not found", args[0])
+		}
+		fmt.Printf("list dbs error: %v\n", err)
 		return err
 	}
 
