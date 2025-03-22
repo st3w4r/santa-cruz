@@ -9,6 +9,17 @@ SELECT
 FROM databases
 WHERE id = ?;
 
+-- name: GetDatabaseByName :one
+SELECT
+    id,
+    name,
+    path,
+    description,
+    created_at,
+    updated_at
+FROM databases
+WHERE name = ?;
+
 -- name: ListDatabases :many
 SELECT
     id,

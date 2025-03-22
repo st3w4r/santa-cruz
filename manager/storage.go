@@ -79,8 +79,15 @@ func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, e
 	return createdDb, nil
 }
 
-func (ds *dbStorageSystem) GetDb(id int64) (dbmanager.Database, error) {
+func (ds *dbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, error) {
 	ctx := context.Background()
+	if name != "" {
+		db, err := ds.queries.GetDatabaseByName(ctx, name)
+		if err != nil {
+			return dbmanager.Database{}, err
+		}
+		return db, nil
+	}
 	db, err := ds.queries.GetDatabase(ctx, id)
 	if err != nil {
 		return dbmanager.Database{}, err

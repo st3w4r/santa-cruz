@@ -16,12 +16,13 @@ func query(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var dbName string
 	id, err := strconv.Atoi(args[0])
 	if err != nil {
-		return err
+		dbName = args[0]
 	}
 
-	db, err := ds.GetDb(int64(id))
+	db, err := ds.GetDb(int64(id), dbName)
 	if err != nil {
 		return err
 	}

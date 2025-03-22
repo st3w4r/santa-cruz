@@ -90,6 +90,32 @@ func (q *Queries) GetDatabase(ctx context.Context, id int64) (Database, error) {
 	return i, err
 }
 
+const getDatabaseByName = `-- name: GetDatabaseByName :one
+SELECT
+    id,
+    name,
+    path,
+    description,
+    created_at,
+    updated_at
+FROM databases
+WHERE name = ?
+`
+
+func (q *Queries) GetDatabaseByName(ctx context.Context, name string) (Database, error) {
+	row := q.db.QueryRowContext(ctx, getDatabaseByName, name)
+	var i Database
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Path,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listDatabases = `-- name: ListDatabases :many
 SELECT
     id,

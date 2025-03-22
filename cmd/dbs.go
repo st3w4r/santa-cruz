@@ -142,7 +142,7 @@ func removeDb(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, id := range ids {
-		db, err := ds.GetDb(int64(id))
+		db, err := ds.GetDb(int64(id), "")
 		if err != nil {
 			fmt.Printf("Database with id %d not found\n", id)
 			continue
@@ -191,12 +191,14 @@ func showDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var dbName string
+
 	id, err := strconv.Atoi(args[0])
 	if err != nil {
-		return err
+		dbName = args[0]
 	}
 
-	db, err := ds.GetDb(int64(id))
+	db, err := ds.GetDb(int64(id), dbName)
 	if err != nil {
 		return err
 	}
@@ -218,7 +220,7 @@ func showDb(cmd *cobra.Command, args []string) error {
 func showDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show",
-		Short: "Show database, usage: cruz show <id>",
+		Short: "Show database, usage: cruz show <id/name>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  showDb,
 	}
@@ -232,12 +234,13 @@ func editDb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	id, _ := strconv.Atoi(args[0])
+	var dbName string
+	id, err := strconv.Atoi(args[0])
 	if err != nil {
-		return err
+		dbName = args[0]
 	}
 
-	_, err = ds.GetDb(int64(id))
+	db, err := ds.GetDb(int64(id), dbName)
 	if err != nil {
 		return err
 	}
@@ -246,7 +249,7 @@ func editDb(cmd *cobra.Command, args []string) error {
 	desc := cmd.Flag("description").Value.String()
 	path := cmd.Flag("path").Value.String()
 
-	db, err := ds.UpdateDb(int64(id), name, path, desc)
+	db, err = ds.UpdateDb(db.ID, name, path, desc)
 	if err != nil {
 		return err
 	}

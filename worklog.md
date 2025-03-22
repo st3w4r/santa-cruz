@@ -81,4 +81,5 @@ func isUniqueViolation(err error) bool {
 ```
 
 
+Okay this is working. Now I would like to select databases in the cli via names instead of using the ID.
 
