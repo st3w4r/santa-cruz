@@ -146,7 +146,11 @@ func removeDb(cmd *cobra.Command, args []string) error {
 	for _, name := range names {
 		db, err := ds.GetDb(0, name)
 		if err != nil {
-			fmt.Printf("Database with name %s not found\n", name)
+			if errors.Is(err, manager.ErrorNotFound) {
+				fmt.Printf("Database with name '%s' not found\n", name)
+				continue
+			}
+			fmt.Printf("error with database '%s'\n", name)
 			continue
 		}
 		dbIds = append(dbIds, db.ID)
@@ -258,6 +262,9 @@ func editDb(cmd *cobra.Command, args []string) error {
 
 	db, err := ds.GetDb(int64(id), dbName)
 	if err != nil {
+		if errors.Is(err, manager.ErrorNotFound) {
+			return fmt.Errorf("database '%s' not found", args[0])
+		}
 		return err
 	}
 
