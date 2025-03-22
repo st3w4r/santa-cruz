@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -70,6 +71,9 @@ func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, e
 		UpdatedAt:   timeNow,
 	})
 	if err != nil {
+		if isUniqueViolation(err) {
+			return dbmanager.Database{}, fmt.Errorf("database with name '%s' already exists", name)
+		}
 		return dbmanager.Database{}, err
 	}
 	return createdDb, nil
@@ -105,6 +109,9 @@ func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) (dbmanage
 		UpdatedAt:   timeNow,
 	})
 	if err != nil {
+		if isUniqueViolation(err) {
+			return dbmanager.Database{}, fmt.Errorf("database with name '%s' already exists", name)
+		}
 		return dbmanager.Database{}, err
 	}
 	return db, nil
