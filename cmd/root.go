@@ -7,12 +7,12 @@ func NewCLI() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:          "cruz",
 		Short:        "Santa Cruz CLI",
-		SilenceUsage: true,
+		SilenceUsage: false,
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},
 	}
-
+	// Manage databases
 	rootCmd.AddCommand(
 		addDbCmd(),
 		listDbsCmd(),
@@ -20,7 +20,7 @@ func NewCLI() *cobra.Command {
 		removeDbCmd(),
 		editDbCmd(),
 	)
-
+	// Operations on managed databases
 	rootCmd.AddCommand(
 		listTablesCmd(),
 		queryCmd(),

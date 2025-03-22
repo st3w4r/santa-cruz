@@ -11,6 +11,8 @@ import (
 )
 
 func listTables(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	ds, err := manager.InitDBManger()
 	if err != nil {
 		return err
@@ -64,7 +66,7 @@ func listTables(cmd *cobra.Command, args []string) error {
 
 func listTablesCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "tables",
+		Use:     "tables <id/name>",
 		Short:   "List tables",
 		Aliases: []string{"tbl"},
 		Args:    cobra.ExactArgs(1),

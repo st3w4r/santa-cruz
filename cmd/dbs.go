@@ -14,6 +14,7 @@ import (
 )
 
 func listDbs(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
 
 	ds, err := manager.InitDBManger()
 	if err != nil {
@@ -63,6 +64,8 @@ func listDbsCmd() *cobra.Command {
 }
 
 func addDb(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	fmt.Println("Add database")
 	ds, err := manager.InitDBManger()
 	if err != nil {
@@ -113,8 +116,8 @@ func addDb(cmd *cobra.Command, args []string) error {
 
 func addDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add",
-		Short: "Add sqlite database, usage: cruz add <path>",
+		Use:   "add <path>",
+		Short: "Add sqlite database, usage: add <path>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  addDb,
 	}
@@ -124,6 +127,8 @@ func addDbCmd() *cobra.Command {
 }
 
 func removeDb(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	fmt.Println("Remove database from tracking:")
 
 	ds, err := manager.InitDBManger()
@@ -191,9 +196,9 @@ func removeDb(cmd *cobra.Command, args []string) error {
 
 func removeDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "remove",
+		Use:     "remove <id/name>",
 		Aliases: []string{"rm"},
-		Short:   "Remove database tracking, usage: cruz remove <id>",
+		Short:   "Remove database tracking, usage: remove <id/name>",
 		Args:    cobra.MinimumNArgs(1),
 		RunE:    removeDb,
 	}
@@ -201,6 +206,7 @@ func removeDbCmd() *cobra.Command {
 }
 
 func showDb(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
 
 	ds, err := manager.InitDBManger()
 	if err != nil {
@@ -240,7 +246,7 @@ func showDb(cmd *cobra.Command, args []string) error {
 func showDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show",
-		Short: "Show database, usage: cruz show <id/name>",
+		Short: "Show database, usage: show <id/name>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  showDb,
 	}
@@ -248,6 +254,7 @@ func showDbCmd() *cobra.Command {
 }
 
 func editDb(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
 
 	ds, err := manager.InitDBManger()
 	if err != nil {
@@ -291,7 +298,7 @@ func editDb(cmd *cobra.Command, args []string) error {
 func editDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "edit",
-		Short: "Edit database, usage: cruz edit <id>",
+		Short: "Edit database, usage: edit <id>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  editDb,
 	}

@@ -11,6 +11,8 @@ import (
 )
 
 func query(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	ds, err := manager.InitDBManger()
 	if err != nil {
 		return err
@@ -74,7 +76,7 @@ func query(cmd *cobra.Command, args []string) error {
 
 func queryCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "query",
+		Use:     "query <id/name> '<sql_query>'",
 		Aliases: []string{"q"},
 		Short:   "Execute a query on a database",
 		Args:    cobra.ExactArgs(2),
