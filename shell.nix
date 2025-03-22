@@ -5,5 +5,6 @@
     pkgs.go
     pkgs.sqlc
     pkgs.git
+    pkgs.just
  ];
 }
