@@ -11,7 +11,7 @@ Bring an easy integration via function calling to sqlite databases.
 - [x] Remove SQLite database
 - [x] Edit SQLite database
 - [x] List tables
-- [ ] Run queries
+- [x] Run queries
 - [ ] Create new SQLite database
 
 
@@ -19,4 +19,9 @@ Bring an easy integration via function calling to sqlite databases.
 
 ```bash
 nix-shell
+```
+
+Database
+```bash
+sqlc generate
 ```

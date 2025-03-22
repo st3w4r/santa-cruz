@@ -80,7 +80,7 @@ func addDb(cmd *cobra.Command, args []string) error {
 	}
 
 	if !strings.HasSuffix(pathAbs, ".db") {
-		return errors.New("File is not a sqlite db")
+		return errors.New("file is not a sqlite db")
 	}
 
 	var name string
@@ -88,7 +88,7 @@ func addDb(cmd *cobra.Command, args []string) error {
 	if name == "" {
 		_, name = filepath.Split(pathAbs)
 		if name == "" {
-			return errors.New("Invalid path")
+			return errors.New("invalid path")
 		}
 		name = strings.TrimSuffix(name, ".db")
 	}

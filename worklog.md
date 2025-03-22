@@ -28,4 +28,57 @@ I need to make a clear separation between the two. Even if I can reuse code, I n
 
 I want to execute queries on the databases I manage.
 The query will return data dynamically based on the databse I am querying.
+I added the ability to run queries on the databases I manage.
+
+What I will need now is an API to manage the databse and run queries.
+This is this API that will be useful for LLM tools.
+
+Also I need to take in consideration the locking of the database, when running queries.
+
+
+# 2025-03-22
+
+I will add the name as unique key for the database. This will help to list databasess and tables and will avoid duplicates.
+I need to implement a migraiton system to update the database schema.
+On unique constraints I need to handle the error properly.
+How to handle the error, I need to get the sqlite error code.
+For now I only have a string error message.
+
+
+```go
+import (
+    sqlite "modernc.org/sqlite"
+)
+
+sqliteErr := err.(*sqlite.Error)
+fmt.Println(sqliteErr.Code())
+fmt.Println(sqliteErr.Error())
+```
+
+It's a type assertion, to get the error code.
+The static type of err is built-in error interface.
+It hold two pieces of data:
+- dynamic type the concrete type implementing the error
+- value the actual value of the concrete type
+
+As well it possible to handle it this way:
+
+```go
+var sqliteErr *sqlite.Error
+errors.As(err, &sqliteErr)
+```
+
+```go
+import (
+    sqlite "modernc.org/sqlite"
+	sqlite3 "modernc.org/sqlite/lib"
+)
+
+func isUniqueViolation(err error) bool {
+	var sqliteErr *sqlite.Error
+	return errors.As(err, &sqliteErr) && sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE
+}
+```
+
+
 
