@@ -132,14 +132,26 @@ func removeDb(cmd *cobra.Command, args []string) error {
 	}
 
 	var ids []int64
+	var names []string
 	for _, arg := range args {
 		id, err := strconv.Atoi(arg)
 		if err != nil {
-			fmt.Printf("Invalid id: %s\n", arg)
+			names = append(names, arg)
 			continue
 		}
 		ids = append(ids, int64(id))
 	}
+
+	dbIds := make([]int64, 0)
+	for _, name := range names {
+		db, err := ds.GetDb(0, name)
+		if err != nil {
+			fmt.Printf("Database with name %s not found\n", name)
+			continue
+		}
+		dbIds = append(dbIds, db.ID)
+	}
+	ids = append(ids, dbIds...)
 
 	for _, id := range ids {
 		db, err := ds.GetDb(int64(id), "")
