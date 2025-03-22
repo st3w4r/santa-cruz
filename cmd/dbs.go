@@ -116,7 +116,7 @@ func addDb(cmd *cobra.Command, args []string) error {
 
 func addDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add <path>",
+		Use:   "add <path_to_db>",
 		Short: "Add sqlite database, usage: add <path>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  addDb,
@@ -245,7 +245,7 @@ func showDb(cmd *cobra.Command, args []string) error {
 
 func showDbCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show",
+		Use:   "show <id/name>",
 		Short: "Show database, usage: show <id/name>",
 		Args:  cobra.ExactArgs(1),
 		RunE:  showDb,
