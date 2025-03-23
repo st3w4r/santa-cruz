@@ -28,8 +28,9 @@ func (s *server) getRootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type ResponseColumn struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	Notnull bool   `json:"not_null"`
 }
 
 type ResponseTable struct {
@@ -119,8 +120,9 @@ func (s *server) getDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 		respColumns := []ResponseColumn{}
 		for _, column := range columns {
 			respColumns = append(respColumns, ResponseColumn{
-				Name: column.Name,
-				Type: column.Type,
+				Name:    column.Name,
+				Type:    column.Type,
+				Notnull: column.Notnull,
 			})
 		}
 

@@ -57,8 +57,9 @@ func ListTablesDb(mdb ManagedDb) ([]Table, error) {
 }
 
 type Column struct {
-	Name string
-	Type string
+	Name    string
+	Type    string
+	Notnull bool
 }
 
 func ListColumnsTable(mdb ManagedDb, tableName string) ([]Column, error) {
@@ -72,8 +73,9 @@ func ListColumnsTable(mdb ManagedDb, tableName string) ([]Column, error) {
 	var columns []Column
 	for _, row := range rows {
 		columns = append(columns, Column{
-			Name: row.Name.String,
-			Type: row.Type.String,
+			Name:    row.Name.String,
+			Type:    row.Type.String,
+			Notnull: row.Notnull.Int64 == 1,
 		})
 	}
 
