@@ -16,16 +16,16 @@ import (
 	"github.com/st3w4r/santa-cruz/dbsqlc/dbmanager"
 )
 
-type dbStorageSystem struct {
-	db      *sql.DB
-	queries *dbmanager.Queries
-	dbPath  string
+type DbStorageSystem struct {
+	Db      *sql.DB
+	Queries *dbmanager.Queries
+	DbPath  string
 }
 
-func InitDBManger() (dbStorageSystem, error) {
+func InitDBManger() (DbStorageSystem, error) {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return dbStorageSystem{}, err
+		return DbStorageSystem{}, err
 	}
 
 	dbPath := cfg.DB_MANAGER_PATH
@@ -35,36 +35,36 @@ func InitDBManger() (dbStorageSystem, error) {
 
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
-		return dbStorageSystem{}, err
+		return DbStorageSystem{}, err
 	}
 
 	ctx := context.Background()
 	if _, err := db.ExecContext(ctx, dbsqlc.CreateTableSchema); err != nil {
-		return dbStorageSystem{}, err
+		return DbStorageSystem{}, err
 	}
 
 	queries := dbmanager.New(db)
 
-	return dbStorageSystem{
-		db:      db,
-		queries: queries,
-		dbPath:  dbPath,
+	return DbStorageSystem{
+		Db:      db,
+		Queries: queries,
+		DbPath:  dbPath,
 	}, nil
 }
 
-func (ds *dbStorageSystem) ListDbs() ([]dbmanager.Database, error) {
+func (ds *DbStorageSystem) ListDbs() ([]dbmanager.Database, error) {
 	ctx := context.Background()
-	dbs, err := ds.queries.ListDatabases(ctx)
+	dbs, err := ds.Queries.ListDatabases(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return dbs, nil
 }
 
-func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, error) {
+func (ds *DbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, error) {
 	ctx := context.Background()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
-	createdDb, err := ds.queries.CreateDatabase(ctx, dbmanager.CreateDatabaseParams{
+	createdDb, err := ds.Queries.CreateDatabase(ctx, dbmanager.CreateDatabaseParams{
 		Name:        name,
 		Path:        path,
 		Description: sql.NullString{String: desc, Valid: true},
@@ -82,7 +82,7 @@ func (ds *dbStorageSystem) AddDb(name, path, desc string) (dbmanager.Database, e
 
 var ErrorNotFound = errors.New("not found")
 
-func (ds *dbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, error) {
+func (ds *DbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, error) {
 	ctx := context.Background()
 	var (
 		db  dbmanager.Database
@@ -90,9 +90,9 @@ func (ds *dbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, err
 	)
 
 	if name != "" {
-		db, err = ds.queries.GetDatabaseByName(ctx, name)
+		db, err = ds.Queries.GetDatabaseByName(ctx, name)
 	} else {
-		db, err = ds.queries.GetDatabase(ctx, id)
+		db, err = ds.Queries.GetDatabase(ctx, id)
 	}
 
 	if err != nil {
@@ -104,20 +104,20 @@ func (ds *dbStorageSystem) GetDb(id int64, name string) (dbmanager.Database, err
 	return db, nil
 }
 
-func (ds *dbStorageSystem) RemoveDb(id int64) error {
+func (ds *DbStorageSystem) RemoveDb(id int64) error {
 	ctx := context.Background()
-	err := ds.queries.DeleteDatabase(ctx, id)
+	err := ds.Queries.DeleteDatabase(ctx, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ds *dbStorageSystem) UpdateDb(id int64, name, path, desc string) (dbmanager.Database, error) {
+func (ds *DbStorageSystem) UpdateDb(id int64, name, path, desc string) (dbmanager.Database, error) {
 	ctx := context.Background()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 
-	db, err := ds.queries.UpdateDatabase(ctx, dbmanager.UpdateDatabaseParams{
+	db, err := ds.Queries.UpdateDatabase(ctx, dbmanager.UpdateDatabaseParams{
 		ID:          id,
 		Name:        sql.NullString{String: name, Valid: name != ""},
 		Path:        sql.NullString{String: path, Valid: path != ""},

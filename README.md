@@ -13,6 +13,7 @@ Bring an easy integration via function calling to sqlite databases.
 - [x] List tables
 - [x] Run queries
 - [ ] Create new SQLite database
+- [ ] API
 
 
 ## Development

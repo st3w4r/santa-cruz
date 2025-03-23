@@ -19,6 +19,7 @@ func NewCLI() *cobra.Command {
 		showDbCmd(),
 		removeDbCmd(),
 		editDbCmd(),
+		serveCmd(),
 	)
 	// Operations on managed databases
 	rootCmd.AddCommand(
