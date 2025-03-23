@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -24,6 +25,33 @@ func (s *server) getRootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Database mangement system is running"))
 }
 
+type ResponseListDatabases struct {
+	Databases []string `json:"databases"`
+}
+
+func (s *server) listDatabases(w http.ResponseWriter, r *http.Request) {
+	dbs, err := s.controlDb.ListDbs()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	dbNames := []string{}
+	for _, db := range dbs {
+		dbNames = append(dbNames, db.Name)
+	}
+
+	respJson, err := json.Marshal(ResponseListDatabases{
+		Databases: dbNames,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(respJson)
+}
+
 func (s *server) Serve(host, port string) error {
 	if port == "" {
 		port = "8080"
@@ -35,6 +63,7 @@ func (s *server) Serve(host, port string) error {
 	r.Use(middleware.StripSlashes)
 
 	r.Get("/", s.getRootHandler)
+	r.Get("/databases", s.listDatabases)
 
 	err := http.ListenAndServe(host+":"+port, r)
 	if err != nil {
