@@ -25,8 +25,14 @@ func (s *server) getRootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Database mangement system is running"))
 }
 
-type ResponseListDatabases struct {
-	Databases []string `json:"databases"`
+type ResponseDatabase struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type ResponseDatabases struct {
+	Databases []ResponseDatabase `json:"databases"`
 }
 
 func (s *server) listDatabases(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +42,17 @@ func (s *server) listDatabases(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbNames := []string{}
+	respDbs := []ResponseDatabase{}
 	for _, db := range dbs {
-		dbNames = append(dbNames, db.Name)
+		respDbs = append(respDbs, ResponseDatabase{
+			Id:          int(db.ID),
+			Name:        db.Name,
+			Description: db.Description.String,
+		})
 	}
 
-	respJson, err := json.Marshal(ResponseListDatabases{
-		Databases: dbNames,
+	respJson, err := json.Marshal(ResponseDatabases{
+		Databases: respDbs,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
