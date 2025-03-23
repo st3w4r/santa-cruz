@@ -89,3 +89,62 @@ Okay I added the ability to manage databases by name.
 Error handling need to be imrpoved.
 When there is no rows returned.
 I handled it, I created a custom error like that I can handle it. And it is not licking the implementation details.
+
+The helper for the command on the CLI is not so good. I would like to have better information on the usage of the command.
+
+```bash
+./santa-cruz add
+Error: accepts 1 arg(s), received 0
+```
+
+In this case I would like to have a message saying what is the expected argument. 
+
+
+I added the tool `just` to help run commands to build and generate sqlc code.
+
+
+# 2025-03-23
+
+Now I have the basic tarcking of the databases. I will need to add the features to make it useful with an LLM.
+
+Exposing an API to list the databases, tables and execute query.
+Exporting the table schema in json format to help the LLM.
+
+Thre is two modes I would like to support;
+- SQL query is managed by the LLM iteself, and create the SQL query.
+- An interface between the LLM and the database, where the LLM only deal with function calls and the intermediate layer transform the function call to SQL query. The intermediate layer will as well be an LLM.
+
+The API will need to expose endpoints for the LLM to interact with the database.
+Some infromation are not needed to be exposed, like the database ID or path This is an implementation detail that should not be exposed.
+I will need enough information to select the DB and tables.
+
+I return the list of databases in the API.
+I want to be able to get details of one database and list the tables of it.
+
+I as well gonna use the ID, even if I could use the name of the database. Maybe I could chanage that if I see it harder to use.
+
+
+In sqlite, the tables are stored in a table called `sqlite_master`.
+The `name` is the name of the table.
+The `table_name` is the name of the table for which it belong to for example for in case of an index table.
+The `sql` is the SQL query to create the table.
+
+```sql
+SELECT * FROM sqlite_master;
+table|test|test|2|CREATE TABLE test (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)
+table|sqlite_sequence|sqlite_sequence|3|CREATE TABLE sqlite_sequence(name,seq)
+view|v_test|v_test|0|CREATE VIEW v_test (name, count) AS SELECT name, COUNT(1) FROM test
+index|idx_name|test|4|CREATE INDEX idx_name ON test(name)
+```
+
+I could then simplify by only returning the `name` and `sql` for tables and views.
+I can filter out the indexes.
+
+```sql
+PRAGMA table_info(sqlite_master);
+0|type|TEXT|0||0
+1|name|TEXT|0||0
+2|tbl_name|TEXT|0||0
+3|rootpage|INT|0||0
+4|sql|TEXT|0||0
+```
