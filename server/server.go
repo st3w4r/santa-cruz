@@ -27,10 +27,18 @@ func (s *server) getRootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Database mangement system is running"))
 }
 
+type ResponseTable struct {
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	TableName string `json:"table_name"`
+	Sql       string `json:"sql"`
+}
+
 type ResponseDatabase struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Id          int             `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Tables      []ResponseTable `json:"tables,omitempty"`
 }
 
 type ResponseDatabases struct {
@@ -81,10 +89,34 @@ func (s *server) getDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dataDb, err := manager.ConnectToManagedDb(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer dataDb.Db.Close()
+
+	tables, err := manager.ListTablesDb(dataDb)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respTables := []ResponseTable{}
+	for _, table := range tables {
+		respTables = append(respTables, ResponseTable{
+			Name:      table.Name,
+			Type:      table.Type,
+			TableName: table.TblName,
+			Sql:       table.Sql,
+		})
+	}
+
 	respJson, err := json.Marshal(ResponseDatabase{
 		Id:          int(db.ID),
 		Name:        db.Name,
 		Description: db.Description.String,
+		Tables:      respTables,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -49,6 +49,7 @@ func listTables(cmd *cobra.Command, args []string) error {
 	for _, table := range tables {
 		data = append(data, []string{
 			table.Name,
+			table.Type,
 			table.TblName,
 			table.Sql,
 		})
@@ -56,7 +57,7 @@ func listTables(cmd *cobra.Command, args []string) error {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Table Name", "SQL"})
+	table.SetHeader([]string{"Name", "Type", "Table Name", "SQL"})
 	table.SetBorder(false)
 	table.AppendBulk(data)
 	table.Render()

@@ -10,8 +10,9 @@ import (
 
 type Table struct {
 	Name    string
-	Sql     string
+	Type    string
 	TblName string
+	Sql     string
 }
 
 type ManagedDb struct {
@@ -46,6 +47,7 @@ func ListTablesDb(mdb ManagedDb) ([]Table, error) {
 	for _, row := range rows {
 		tables = append(tables, Table{
 			Name:    row.Name.String,
+			Type:    row.Type.String,
 			TblName: row.TblName.String,
 			Sql:     row.Sql.String,
 		})

@@ -13,15 +13,17 @@ import (
 const listTables = `-- name: ListTables :many
 SELECT 
     name,
+    type,
     tbl_name,
     sql
 FROM sqlite_master
 WHERE
-name NOT LIKE 'sqlite_%'
+    name NOT LIKE 'sqlite_%'
 `
 
 type ListTablesRow struct {
 	Name    sql.NullString
+	Type    sql.NullString
 	TblName sql.NullString
 	Sql     sql.NullString
 }
@@ -35,7 +37,12 @@ func (q *Queries) ListTables(ctx context.Context) ([]ListTablesRow, error) {
 	var items []ListTablesRow
 	for rows.Next() {
 		var i ListTablesRow
-		if err := rows.Scan(&i.Name, &i.TblName, &i.Sql); err != nil {
+		if err := rows.Scan(
+			&i.Name,
+			&i.Type,
+			&i.TblName,
+			&i.Sql,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
