@@ -148,3 +148,119 @@ PRAGMA table_info(sqlite_master);
 3|rootpage|INT|0||0
 4|sql|TEXT|0||0
 ```
+
+I want to return the column names and types of the tables.
+
+This article is interesting: https://blog.dust.tt/spreadsheets-databases-and-beyond-creating-a-universal-ai-query-layer/
+
+
+```bash
+sqlite> .headers ON
+sqlite> .mode columns
+```
+
+
+In dbsqlc I want to do arbitrary queries, that are not necesarily based on a table I create. I want to be able to run query from sqlite tables.
+
+Okay I managed to return the columns of a table, but I had to by pass the sqlc code generation. I will need to find a way to do it properly.
+
+The result:
+```json
+{
+  "id": 4,
+  "name": "dummy",
+  "description": "",
+  "tables": [
+    {
+      "name": "test",
+      "type": "table",
+      "table_name": "test",
+      "sql": "CREATE TABLE test (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "name",
+          "type": "TEXT"
+        }
+      ]
+    },
+    {
+      "name": "v_test",
+      "type": "view",
+      "table_name": "v_test",
+      "sql": "CREATE VIEW v_test (name, count) AS SELECT name, COUNT(1) FROM test",
+      "columns": [
+        {
+          "name": "name",
+          "type": "TEXT"
+        },
+        {
+          "name": "count",
+          "type": ""
+        }
+      ]
+    }
+  ]
+}```
+
+
+I added the not null indication:
+```json
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "not_null": false
+        },
+        {
+          "name": "username",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "not_null": true
+        },
+        {
+          "name": "age",
+          "type": "INTEGER",
+          "not_null": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "not_null": false
+        }
+      ]
+```
+
+What next?
+I want to update the CLI to reflect the changes in the API.
+And after I need to be able to execute queries on the tables.
+
+
+Okay good for the columns:
+```bash
+./santa-cruz tables dummy
+   NAME  | TYPE  | TABLE NAME |              SQL               |      COLUMNS       
+---------+-------+------------+--------------------------------+--------------------
+  test   | table | test       | CREATE TABLE test (id INTEGER  | id (INTEGER)       
+         |       |            | PRIMARY KEY AUTOINCREMENT,     | name (TEXT)        
+         |       |            | name TEXT)                     |                    
+  v_test | view  | v_test     | CREATE VIEW v_test (name,      | name (TEXT)        
+         |       |            | count) AS SELECT name,         | count ()           
+         |       |            | COUNT(1) FROM test             |                    
+  users  | table | users      | CREATE TABLE users (     id    | id (INTEGER)       
+         |       |            |          INTEGER PRIMARY KEY   | username (TEXT)    
+         |       |            | AUTOINCREMENT,     username    | email (TEXT)       
+         |       |            |    TEXT    NOT NULL UNIQUE,    | age (INTEGER)      
+         |       |            |     email       TEXT    NOT    | created_at (TEXT)  
+         |       |            | NULL UNIQUE,     age           |                    
+         |       |            | INTEGER,     created_at  TEXT  |                    
+         |       |            |   DEFAULT CURRENT_TIMESTAMP )  |                 
+```
+
