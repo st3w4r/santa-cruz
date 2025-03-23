@@ -19,6 +19,7 @@ SELECT
 FROM sqlite_master
 WHERE
     name NOT LIKE 'sqlite_%'
+AND type IN ('table', 'view')
 `
 
 type ListTablesRow struct {

@@ -55,3 +55,27 @@ func ListTablesDb(mdb ManagedDb) ([]Table, error) {
 
 	return tables, nil
 }
+
+type Column struct {
+	Name string
+	Type string
+}
+
+func ListColumnsTable(mdb ManagedDb, tableName string) ([]Column, error) {
+	rows, err := mdb.Queries.ListColumns(context.Background(), dbmanaged.ListColumnsParams{
+		TableName: tableName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var columns []Column
+	for _, row := range rows {
+		columns = append(columns, Column{
+			Name: row.Name.String,
+			Type: row.Type.String,
+		})
+	}
+
+	return columns, nil
+}

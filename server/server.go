@@ -27,11 +27,17 @@ func (s *server) getRootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Database mangement system is running"))
 }
 
+type ResponseColumn struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 type ResponseTable struct {
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	TableName string `json:"table_name"`
-	Sql       string `json:"sql"`
+	Name      string           `json:"name"`
+	Type      string           `json:"type"`
+	TableName string           `json:"table_name"`
+	Sql       string           `json:"sql"`
+	Columns   []ResponseColumn `json:"columns,omitempty"`
 }
 
 type ResponseDatabase struct {
@@ -104,11 +110,26 @@ func (s *server) getDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 
 	respTables := []ResponseTable{}
 	for _, table := range tables {
+
+		columns, err := manager.ListColumnsTable(dataDb, table.Name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		respColumns := []ResponseColumn{}
+		for _, column := range columns {
+			respColumns = append(respColumns, ResponseColumn{
+				Name: column.Name,
+				Type: column.Type,
+			})
+		}
+
 		respTables = append(respTables, ResponseTable{
 			Name:      table.Name,
 			Type:      table.Type,
 			TableName: table.TblName,
 			Sql:       table.Sql,
+			Columns:   respColumns,
 		})
 	}
 
