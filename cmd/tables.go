@@ -47,17 +47,28 @@ func listTables(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, table := range tables {
+
+		columns, err := manager.ListColumnsTable(mdb, table.Name)
+		if err != nil {
+			return err
+		}
+		columnsStr := ""
+		for _, column := range columns {
+			columnsStr += column.Name + " (" + column.Type + ")\n"
+		}
+
 		data = append(data, []string{
 			table.Name,
 			table.Type,
 			table.TblName,
 			table.Sql,
+			columnsStr,
 		})
 
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Type", "Table Name", "SQL"})
+	table.SetHeader([]string{"Name", "Type", "Table Name", "SQL", "Columns"})
 	table.SetBorder(false)
 	table.AppendBulk(data)
 	table.Render()
