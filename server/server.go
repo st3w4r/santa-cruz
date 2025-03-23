@@ -2,7 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -35,7 +37,7 @@ type ResponseDatabases struct {
 	Databases []ResponseDatabase `json:"databases"`
 }
 
-func (s *server) listDatabases(w http.ResponseWriter, r *http.Request) {
+func (s *server) listDatabasesHandler(w http.ResponseWriter, r *http.Request) {
 	dbs, err := s.controlDb.ListDbs()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,6 +64,36 @@ func (s *server) listDatabases(w http.ResponseWriter, r *http.Request) {
 	w.Write(respJson)
 }
 
+func (s *server) getDatabaseHandler(w http.ResponseWriter, r *http.Request) {
+
+	dbIdParam := chi.URLParam(r, "dbId")
+
+	dbId, err := strconv.Atoi(dbIdParam)
+	if err != nil {
+		err = fmt.Errorf("database id must be an integer")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, err := s.controlDb.GetDb(int64(dbId), "")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respJson, err := json.Marshal(ResponseDatabase{
+		Id:          int(db.ID),
+		Name:        db.Name,
+		Description: db.Description.String,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(respJson)
+}
+
 func (s *server) Serve(host, port string) error {
 	if port == "" {
 		port = "8080"
@@ -73,7 +105,8 @@ func (s *server) Serve(host, port string) error {
 	r.Use(middleware.StripSlashes)
 
 	r.Get("/", s.getRootHandler)
-	r.Get("/databases", s.listDatabases)
+	r.Get("/databases", s.listDatabasesHandler)
+	r.Get("/databases/{dbId}", s.getDatabaseHandler)
 
 	err := http.ListenAndServe(host+":"+port, r)
 	if err != nil {
