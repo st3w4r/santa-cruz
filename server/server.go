@@ -165,6 +165,13 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		err = fmt.Errorf("?query parameter is required, example: ?query=SELECT * FROM users")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	dataDb, err := manager.ConnectToManagedDb(db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -173,13 +180,13 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 	defer dataDb.Db.Close()
 
 	ctx := r.Context()
-	rows, err := dataDb.Db.QueryContext(ctx, r.URL.Query().Get("query"))
+	rows, err := dataDb.Db.QueryContext(ctx, query)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	cols, err := rows.Columns()
+	cols, err := rows.ColumnTypes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -196,7 +203,40 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 		_ = rows.Scan(rowPtr...)
 		rowData := map[string]interface{}{}
 		for i, r := range row {
-			rowData[cols[i]] = string(r)
+			colType := cols[i].DatabaseTypeName()
+			colName := cols[i].Name()
+			if colType == "INTEGER" {
+				val, err := strconv.Atoi(string(r))
+				if err != nil {
+					rowData[colName] = nil
+				} else {
+					rowData[colName] = val
+				}
+			} else if colType == "BOOLEAN" {
+				val, err := strconv.ParseBool(string(r))
+				if err != nil {
+					rowData[colName] = nil
+				} else {
+					rowData[colName] = val
+				}
+			} else if colType == "REAL" {
+				val, err := strconv.ParseFloat(string(r), 64)
+				if err != nil {
+					rowData[colName] = nil
+				} else {
+					rowData[colName] = val
+				}
+			} else if colType == "TEXT" {
+				rowData[colName] = string(r)
+			} else if colType == "BLOB" {
+				rowData[colName] = string(r)
+			} else if colType == "JSON" {
+				rowData[colName] = string(r)
+			} else if colType == "NULL" {
+				rowData[colName] = nil
+			} else {
+				rowData[colName] = string(r)
+			}
 		}
 		data = append(data, rowData)
 	}
