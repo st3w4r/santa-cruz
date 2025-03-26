@@ -2,9 +2,38 @@ import argparse
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
+from urllib.parse import urljoin
 
+import requests
 from agents import Agent, ItemHelpers, Runner, function_tool
 from openai.types.responses import ResponseTextDeltaEvent
+
+API_BASE = "http://localhost:8080"
+
+@function_tool
+def fetch_databases():
+    endpoint = "databases/"
+    url = urljoin(API_BASE, endpoint)
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+@function_tool
+def fetch_database_details(database_id: int):
+    endpoint = f"databases/{database_id}/"
+    url = urljoin(API_BASE, endpoint)
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+@function_tool
+def run_query(database_id:int, query: str):
+    endpoint = f"databases/{database_id}/run"
+    url = urljoin(API_BASE, endpoint)
+    params = {'query': query}
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    return response.json()
 
 
 @dataclass
@@ -47,10 +76,19 @@ weatherAgent = Agent[UserContext](
     tools=[get_weather],
 )
 
+dbAgent = Agent(
+    name="DB",
+    instructions="Get databases!",
+    tools=[
+        fetch_databases,
+        fetch_database_details,
+        run_query,
+    ],
+)
 triageAgent = Agent(
     name="Triager",
     instructions="Call the correct agent!",
-    handoffs=[codeAgent, reviewerAgent, pmAgent, weatherAgent],
+    handoffs=[codeAgent, reviewerAgent, pmAgent, weatherAgent, dbAgent],
 )
 
 async def main(args):
