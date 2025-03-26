@@ -190,14 +190,13 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 	for i := range row {
 		rowPtr[i] = &row[i]
 	}
-	data := [][]string{}
+	data := []map[string]interface{}{}
 
 	for rows.Next() {
 		_ = rows.Scan(rowPtr...)
-
-		rowData := []string{}
-		for _, r := range row {
-			rowData = append(rowData, string(r))
+		rowData := map[string]interface{}{}
+		for i, r := range row {
+			rowData[cols[i]] = string(r)
 		}
 		data = append(data, rowData)
 	}
