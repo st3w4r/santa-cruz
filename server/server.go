@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -154,6 +155,46 @@ type respQuery struct {
 	Data    []map[string]any `json:"data"`
 }
 
+func parseColValue(col *sql.ColumnType, val []byte) any {
+	colType := col.DatabaseTypeName()
+	if colType == "INTEGER" {
+		val, err := strconv.Atoi(string(val))
+		if err != nil {
+			return nil
+		}
+		return val
+	} else if colType == "BOOLEAN" {
+		val, err := strconv.ParseBool(string(val))
+		if err != nil {
+			return nil
+		}
+		return val
+	} else if colType == "REAL" {
+		val, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			return nil
+		}
+		return val
+	} else if colType == "TEXT" {
+		return string(val)
+	} else if colType == "BLOB" {
+		return string(val)
+	} else if colType == "JSON" {
+		if string(val) == "" {
+			return nil
+		}
+		var jsonVal any
+		err := json.Unmarshal(val, &jsonVal)
+		if err != nil {
+			return nil
+		}
+		return jsonVal
+	} else if colType == "NULL" {
+		return nil
+	}
+	return string(val)
+}
+
 func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 	dbIdParam := chi.URLParam(r, "dbId")
 
@@ -208,50 +249,8 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 		_ = rows.Scan(rowPtr...)
 		rowData := map[string]any{}
 		for i, r := range row {
-			colType := cols[i].DatabaseTypeName()
 			colName := cols[i].Name()
-			if colType == "INTEGER" {
-				val, err := strconv.Atoi(string(r))
-				if err != nil {
-					rowData[colName] = nil
-				} else {
-					rowData[colName] = val
-				}
-			} else if colType == "BOOLEAN" {
-				val, err := strconv.ParseBool(string(r))
-				if err != nil {
-					rowData[colName] = nil
-				} else {
-					rowData[colName] = val
-				}
-			} else if colType == "REAL" {
-				val, err := strconv.ParseFloat(string(r), 64)
-				if err != nil {
-					rowData[colName] = nil
-				} else {
-					rowData[colName] = val
-				}
-			} else if colType == "TEXT" {
-				rowData[colName] = string(r)
-			} else if colType == "BLOB" {
-				rowData[colName] = string(r)
-			} else if colType == "JSON" {
-				if string(r) == "" {
-					rowData[colName] = nil
-				} else {
-					var val any
-					err := json.Unmarshal(r, &val)
-					if err != nil {
-						rowData[colName] = nil
-					} else {
-						rowData[colName] = val
-					}
-				}
-			} else if colType == "NULL" {
-				rowData[colName] = nil
-			} else {
-				rowData[colName] = string(r)
-			}
+			rowData[colName] = parseColValue(cols[i], r)
 		}
 		data = append(data, rowData)
 	}
