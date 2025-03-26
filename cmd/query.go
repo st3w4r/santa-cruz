@@ -61,7 +61,6 @@ func query(cmd *cobra.Command, args []string) error {
 			rowData = append(rowData, string(r))
 		}
 		data = append(data, rowData)
-
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
@@ -80,9 +79,8 @@ func queryCmd() *cobra.Command {
 		Aliases: []string{"q"},
 		Short:   "Execute a query on a database",
 		Args:    cobra.ExactArgs(2),
-		Example: "cruz query 1 'SELECT * FROM table'",
+		Example: "cruz query my_db 'SELECT * FROM table'",
 		RunE:    query,
 	}
-
 	return cmd
 }

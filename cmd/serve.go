@@ -18,7 +18,7 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 	dataDbs := []manager.ManagedDb{}
 
-	fmt.Println("Starting server on " + host + ":" + port)
+	fmt.Println("Starting server on http://" + host + ":" + port)
 	server := server.NewServer(controlDb, dataDbs)
 	err = server.Serve(host, port)
 	if err != nil {
