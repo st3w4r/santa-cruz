@@ -149,6 +149,11 @@ func (s *server) getDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(respJson)
 }
 
+type respQuery struct {
+	Columns []string         `json:"columns"`
+	Data    []map[string]any `json:"data"`
+}
+
 func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 	dbIdParam := chi.URLParam(r, "dbId")
 
@@ -193,15 +198,15 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	row := make([][]byte, len(cols))
-	rowPtr := make([]interface{}, len(cols))
+	rowPtr := make([]any, len(cols))
 	for i := range row {
 		rowPtr[i] = &row[i]
 	}
-	data := []map[string]interface{}{}
+	data := []map[string]any{}
 
 	for rows.Next() {
 		_ = rows.Scan(rowPtr...)
-		rowData := map[string]interface{}{}
+		rowData := map[string]any{}
 		for i, r := range row {
 			colType := cols[i].DatabaseTypeName()
 			colName := cols[i].Name()
@@ -231,7 +236,17 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 			} else if colType == "BLOB" {
 				rowData[colName] = string(r)
 			} else if colType == "JSON" {
-				rowData[colName] = string(r)
+				if string(r) == "" {
+					rowData[colName] = nil
+				} else {
+					var val any
+					err := json.Unmarshal(r, &val)
+					if err != nil {
+						rowData[colName] = nil
+					} else {
+						rowData[colName] = val
+					}
+				}
 			} else if colType == "NULL" {
 				rowData[colName] = nil
 			} else {
@@ -241,7 +256,17 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 		data = append(data, rowData)
 	}
 
-	respJson, err := json.Marshal(data)
+	colNames := []string{}
+	for _, cols := range cols {
+		colNames = append(colNames, cols.Name())
+	}
+
+	resp := respQuery{
+		Columns: colNames,
+		Data:    data,
+	}
+
+	respJson, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
