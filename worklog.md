@@ -264,3 +264,185 @@ Okay good for the columns:
          |       |            |   DEFAULT CURRENT_TIMESTAMP )  |                 
 ```
 
+
+
+# 2025-03-26
+
+I want to be able to execute queries on the tables.
+
+I need to design the API:
+
+```bash
+GET localhost:8080/databases/4?query=SELECT * FROM test
+
+POST localhost:8080/databases/4/query
+--data: {
+    "query": "SELECT * FROM test"
+}
+
+POST localhost:8080/databases/4/query
+--data: {
+    "select": "*",
+    "from": "test",
+    "where": "id = 1"
+}
+
+
+POST localhost:8080/databases/4/query
+--data 'SELECT * FROM test'
+```
+
+For manual use I like the query in the query paramters. And I like the post with raw text to pass the query.
+
+For function calling an API integration I think I should go with the json format.
+I will have a look to the Dust article to have a sense of their universal interface.
+
+Returning data will be dynamic.
+
+```json
+[
+  [
+    "1",
+    "yana",
+    "yb@mail.com",
+    "31",
+    "2025-03-26 10:32:19"
+  ],
+  [
+    "2",
+    "jay",
+    "neal@mail.com",
+    "42",
+    "2025-03-26 11:14:37"
+  ]
+]
+```
+
+For now this is what I get back but I want to have a proper format with the column names and the correct types.
+
+```json
+[{
+    "id": 1,
+    "username": "yana",
+    "email": "yb@mail.com",
+    "age": 31,
+    "created_at": "2025-03-26 10:32:19"
+}]
+```
+
+This format, but I need to handle the types properly.
+I have that for now:
+```json
+[
+  {
+    "age": "31",
+    "created_at": "2025-03-26 10:32:19",
+    "email": "yb@mail.com",
+    "id": "1",
+    "username": "yana"
+  },
+  {
+    "age": "42",
+    "created_at": "2025-03-26 11:14:37",
+    "email": "neal@mail.com",
+    "id": "2",
+    "username": "jay"
+  }
+]```
+
+The type is not correct.
+
+Maybe for LLM returning all the column names is not the most efficient as it will consume a lot of tokens.
+
+database/sql supports `ColumnTypes` function.
+This seems exactly what I need.
+
+I'm able to retrive the type of the column from the database.
+`cols[i].DatabaseTypeName()`
+
+Now I need to handle the proepr conersion of the data.
+
+There we go:
+```json
+[
+  {
+    "age": 31,
+    "created_at": "2025-03-26 10:32:19",
+    "email": "yb@mail.com",
+    "id": 1,
+    "username": "yana"
+  },
+  {
+    "age": 42,
+    "created_at": "2025-03-26 11:14:37",
+    "email": "neal@mail.com",
+    "id": 2,
+    "username": "jay"
+  }
+]```
+
+
+okay It support now JSON, Boolean, Integer, Float, Text and Null.
+And I return the column names and the data.
+
+```json
+{
+  "columns": [
+    "id",
+    "name",
+    "age",
+    "salary",
+    "profile_picture",
+    "created_at",
+    "metadata",
+    "notes",
+    "is_active"
+  ],
+  "data": [
+    {
+      "age": 28,
+      "created_at": "2025-03-26T16:45:00Z",
+      "id": 4,
+      "is_active": true,
+      "metadata": {
+        "certified": true,
+        "department": {
+          "floor": 3,
+          "name": "Research"
+        },
+        "employee_id": "E12345",
+        "manager": null,
+        "performance_scores": {
+          "2023": 4.7,
+          "2024": 4.9
+        },
+        "skills": [
+          "SQL",
+          "Python",
+          "Data Analysis"
+        ]
+      },
+      "name": "Dana",
+      "notes": "Highly skilled analyst",
+      "profile_picture": "",
+      "salary": 62000
+    }
+  ]
+}
+```
+
+
+Amazing I used the new OpenAI Agent SDK in Python.
+I was able to connect the API to the agent and run queries on the database.
+It does multiple function calls and it call the DB correctly.
+
+I need to turn the agent script into a chat, to have a proper interaction.
+
+
+# 2025-03-27
+
+I added the tools to my tool store and it is working very well.
+I can have access with my chat interface and this is neat.
+
+I would like to have a better experience with the chat and the agent though.
+
