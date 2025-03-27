@@ -14,6 +14,10 @@ Bring an easy integration via function calling to sqlite databases.
 - [x] Run queries
 - [ ] Create new SQLite database
 - [ ] API
+    - [x] List SQLite databases
+    - [x] List tables
+    - [x] Run queries
+
 
 
 ## Development

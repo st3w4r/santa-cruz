@@ -157,19 +157,19 @@ type respQuery struct {
 
 func parseColValue(col *sql.ColumnType, val []byte) any {
 	colType := col.DatabaseTypeName()
-	if colType == "INTEGER" {
+	if colType == "INTEGER" || colType == "INT" {
 		val, err := strconv.Atoi(string(val))
 		if err != nil {
 			return nil
 		}
 		return val
-	} else if colType == "BOOLEAN" {
+	} else if colType == "BOOLEAN" || colType == "BOOL" {
 		val, err := strconv.ParseBool(string(val))
 		if err != nil {
 			return nil
 		}
 		return val
-	} else if colType == "REAL" {
+	} else if colType == "REAL" || colType == "FLOAT" {
 		val, err := strconv.ParseFloat(string(val), 64)
 		if err != nil {
 			return nil
@@ -213,7 +213,7 @@ func (s *server) getRunQueryHandler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query().Get("query")
 	if query == "" {
-		err = fmt.Errorf("?query parameter is required, example: ?query=SELECT * FROM users")
+		err = fmt.Errorf("?query parameter is required, example: ?query=SELECT * FROM table")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
